@@ -1,32 +1,39 @@
-import ExploreBtn from "@/components/ExploreBtn"
-import EventCard from "@/components/EventCard"
-import { events } from "@/lib/constants"
-const page = () => {
+import ExploreBtn from "@/components/ExploreBtn";
+import EventCard from "@/components/EventCard";
+import { events } from "@/lib/constants";
+import { captureServerEvent } from "@/lib/posthog-server";
+
+const page = async () => {
+  await captureServerEvent({
+    distinctId: "homepage_featured_events",
+    event: "featured_events_list_viewed",
+    properties: {
+      event_count: events.length,
+      page_name: "home",
+      section: "featured_events",
+    },
+  });
+
   return (
-   
     <section>
-      <h1 className="text-center">The Hub for every dev<br/> event u cant miss</h1> 
+      <h1 className="text-center">
+        The Hub for every dev
+        <br /> event u cant miss
+      </h1>
       <p className="text-center mt-5">Hackathons,meetups,confrences</p>
       <ExploreBtn />
-      <div className="mt-20 space-y-7">
+      <div className="mt-20 space-y-7" id="events">
         <h3>Featured Events</h3>
         <ul className="events">
           {events.map((event) => (
             <li key={event.title}>
-              <EventCard {...event}/>
-              
-              </li>
-
-
+              <EventCard {...event} />
+            </li>
           ))}
-
         </ul>
-      
       </div>
     </section>
-     
-    
-  )
-}
+  );
+};
 
-export default page
+export default page;
