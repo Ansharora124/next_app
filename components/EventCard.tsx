@@ -42,7 +42,7 @@ const EventCard = ({ title, image, slug, location, date, time }: Props) => {
         <p>{time}</p>
       </div>
     </Link>
-  );
+  );  
 };
 
 export default EventCard;
