@@ -4,25 +4,19 @@
 import { useState } from "react";
 
 const BookEvent = () => {
-  
- 
-    const[email,setEmail]=useState("");
-    const [submitted,setSubmitted]=useState(false);
-const handleSubmit=(e:React.FormEvent)=>{
-e,preventDefault();
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
-setTimeout(()=>{
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setSubmitted(true);
-
-},1000)
-
-}
+  };
     return (
-    <div id="bok-event">
+    <div id="book-event">
      {submitted ? (
       <p className="text-sm">Thank you for signing up! We will keep you updated.</p>
      ):(
-<form>
+<form onSubmit={handleSubmit}>
     <div> 
         <label htmlFor="email">Email Address</label>
         <input type="email"
@@ -31,7 +25,7 @@ setTimeout(()=>{
          onChange={(e) => setEmail(e.target.value)}
          placeholder="Enter your email" />
     </div>
-    <button type="submit" className="btn-submit">Submit</button>
+    <button type="submit">Submit</button>
 </form>
 
      )}
