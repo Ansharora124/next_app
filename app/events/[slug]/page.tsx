@@ -5,6 +5,9 @@ import { IEvent } from "@/database";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
+import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
+import EventCard from "@/components/EventCard";
+
 
 const EventDetailItem = ({ icon, alt, label }: { icon: string; alt: string; label: string }) => (
   <div className="flex gap-2 items-center">
@@ -49,6 +52,8 @@ const EventDetailsPage = async ({ params }: {params:Promise<{slug:string}>}) => 
 
   if(!description) return notFound();
   const bookings=10;
+  const similarEvents :IEvent[] = await getSimilarEventsBySlug(slug);
+
   return (
     <section id="event">
  <div className="header">
@@ -74,13 +79,13 @@ const EventDetailsPage = async ({ params }: {params:Promise<{slug:string}>}) => 
    
   
 </section>
-<EventAgenda agendaItems={JSON.parse(agenda[0])}/>
+<EventAgenda agendaItems={agenda}/>
 <section className="flex-col-gap-2">
   <h2>About Organizer</h2>
   <p>{organizer}</p>
 
 </section>
-<EventTags tags={JSON.parse(tags[0])} />
+<EventTags tags={tags} />
 </div>
 
 
@@ -104,6 +109,19 @@ const EventDetailsPage = async ({ params }: {params:Promise<{slug:string}>}) => 
 
 
 
+
+ </div>
+ <div className="flex w-full flex-col gap-4 pt-20">
+  <h2>Similar Events</h2>
+  <div className="events">
+    {similarEvents.length>0 ? (
+      similarEvents.map((similarEvent:IEvent)=>(
+        <EventCard key={similarEvent._id.toString()} {...similarEvent}/>
+      ))
+    ) : (
+      <p>No similar events found.</p>
+    )}
+  </div>
 
  </div>
 
