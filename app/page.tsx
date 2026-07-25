@@ -3,10 +3,20 @@ import EventCard from "@/components/EventCard";
 import { events as featuredEvents } from "@/lib/constants";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { IEvent } from "@/database";
+import { cacheLife } from "next/dist/server/use-cache/cache-life";
+
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 const page = async () => {
+ 
+  'use cache';
+  cacheLife('hours');
+
+  const response=await fetch(`${BASE_URL}/api/events`);
+  const {events}=await response.json();
+
+ 
   await captureServerEvent({
     distinctId: "homepage_featured_events",
     event: "featured_events_list_viewed",
@@ -16,10 +26,7 @@ const page = async () => {
       section: "featured_events",
     },
   });
-
-  const response=await fetch(`${BASE_URL}/api/events`);
-  const {events}=await response.json();
-
+ 
   return (
     <section>
       <h1 className="text-center">
@@ -32,7 +39,7 @@ const page = async () => {
         <h3>Featured Events</h3>
         <ul className="events">
           {events && events.length>0 &&events.map((event:IEvent) => (
-            <li key={event.title}>
+            <li key={event.title} className="list-none">
               <EventCard {...event} />
             </li>
           ))}
