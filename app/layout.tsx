@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Schibsted_Grotesk,Martian_Mono } from "next/font/google";
 import "./globals.css";
-import LightRays from "../components/LightRays"; 
+import Orb from "../components/Orb"; 
 import Navbar from "../components/Navbar"; 
 
 
@@ -30,22 +30,14 @@ export default function RootLayout({
       <body className={`${schibstedGrotesk.variable} ${martianMono.variable} min-h-full flex flex-col relative overflow-x-hidden`}>
         <Navbar />  
 
-<div className="absolute inset-x-0 top-[72px] z-[-1] min-h-[calc(100vh-72px)] overflow-hidden">
-  <LightRays
-    raysOrigin="top-center-offset"
-    raysColor="#f2e6e6"
-    raysSpeed={1}
-    lightSpread={0.5}
-    rayLength={1.4}
-    followMouse={true}
-    mouseInfluence={0.1}
-    noiseAmount={0}
-    distortion={0}
-    className="custom-rays"
-    pulsating={false}
-    fadeDistance={1}
-    saturation={1}
-/>
+<div className="fixed inset-x-0 top-[72px] z-[-1] h-[calc(100vh-72px)] overflow-hidden bg-black">
+  <Orb
+    hue={160}
+    hoverIntensity={0.45}
+    rotateOnHover={true}
+    forceHoverState={false}
+    backgroundColor="#000000"
+  />
 
 </div>
   

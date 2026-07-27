@@ -27,12 +27,14 @@ const HomeContent = async () => {
   });
  
   return (
-    <section>
-      <h1 className="text-center">
-        The Hub for every dev
-        <br /> event u cant miss
-      </h1>
-      <p className="text-center mt-5">Hackathons,meetups,confrences</p>
+    <section id="home">
+      <div className="hero-copy">
+        <h1>
+          The Hub for every dev
+          <br /> event u cant miss
+        </h1>
+        <p>Hackathons,meetups,confrences</p>
+      </div>
       <ExploreBtn />
       <div className="mt-20 space-y-7" id="events">
         <h3>Featured Events</h3>

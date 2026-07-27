@@ -134,6 +134,20 @@
 
 @layer components {
   #home {
+    @apply flex min-h-[calc(100vh-112px)] flex-col justify-center pt-8;
+
+    .hero-copy {
+      @apply mx-auto flex min-h-[360px] w-full max-w-[720px] flex-col items-center justify-center px-4 text-center max-sm:min-h-[300px];
+
+      h1 {
+        @apply max-w-[680px] text-center text-5xl leading-tight max-sm:text-3xl;
+      }
+
+      p {
+        @apply mt-5 text-center text-lg text-light-100 max-sm:text-sm;
+      }
+    }
+
     .subheading {
       @apply text-light-100 text-lg max-sm:text-sm text-center mt-5;
     }
