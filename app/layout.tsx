@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Schibsted_Grotesk,Martian_Mono, Geist } from "next/font/google";
+import { Schibsted_Grotesk,Martian_Mono } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
 import LightRays from "../components/LightRays"; 
 import Navbar from "../components/Navbar"; 
 
@@ -28,10 +27,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${schibstedGrotesk.variable} ${martianMono.variable} min-h-full flex flex-col`}>
+      <body className={`${schibstedGrotesk.variable} ${martianMono.variable} min-h-full flex flex-col relative overflow-x-hidden`}>
         <Navbar />  
 
-<div className="absolute top-0 inset-0 z-[-1] min-h-screen">
+<div className="absolute inset-x-0 top-[72px] z-[-1] min-h-[calc(100vh-72px)] overflow-hidden">
   <LightRays
     raysOrigin="top-center-offset"
     raysColor="#f2e6e6"

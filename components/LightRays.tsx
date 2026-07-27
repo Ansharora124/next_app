@@ -30,6 +30,9 @@ interface LightRaysProps {
   className?: string;
 }
 
+type UniformValue = number | number[];
+type UniformMap = Record<string, { value: UniformValue }>;
+
 const DEFAULT_COLOR = "#ffffff";
 
 const hexToRgb = (hex: string): [number, number, number] => {
@@ -87,12 +90,12 @@ const LightRays: React.FC<LightRaysProps> = ({
   className = "",
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const uniformsRef = useRef<any>(null);
+  const uniformsRef = useRef<UniformMap | null>(null);
   const rendererRef = useRef<Renderer | null>(null);
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const smoothMouseRef = useRef({ x: 0.5, y: 0.5 });
   const animationIdRef = useRef<number | null>(null);
-  const meshRef = useRef<any>(null);
+  const meshRef = useRef<Mesh | null>(null);
   const cleanupFunctionRef = useRef<(() => void) | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);

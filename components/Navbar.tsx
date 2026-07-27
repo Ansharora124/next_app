@@ -2,15 +2,30 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import GooeyNav from "@/components/GooeyNav";
 import { trackEvent } from "@/lib/posthog-client";
 
 const navigationItems = [
   { href: "/", label: "Home" },
-  { href: "/", label: "Events" },
-  { href: "/", label: "Create" },
+  { href: "/#events", label: "Events" },
+  { href: "/events/create", label: "Create" },
 ];
 
 const Navbar = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const pathname = window.location.pathname;
+    const nextActiveIndex = pathname.startsWith("/events/create")
+      ? 2
+      : pathname.startsWith("/events")
+        ? 1
+        : 0;
+
+    setActiveIndex(nextActiveIndex);
+  }, []);
+
   const handleNavigationClick = async (label: string, href: string) => {
     await trackEvent("navigation_link_clicked", {
       navigation_label: label,
@@ -30,18 +45,14 @@ const Navbar = () => {
           <Image src="/icons/logo.png" alt="Logo" width={24} height={24} />
           <p>DevEvents</p>
         </Link>
-        <ul>
-          {navigationItems.map((item) => (
-            <li key={item.label}>
-              <Link
-                href={item.href}
-                onClick={() => handleNavigationClick(item.label, item.href)}
-              >
-                {item.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <GooeyNav
+          items={navigationItems}
+          initialActiveIndex={activeIndex}
+          particleCount={12}
+          particleDistances={[70, 8]}
+          particleR={90}
+          onItemClick={(item) => handleNavigationClick(item.label, item.href)}
+        />
       </nav>
     </header>
   );

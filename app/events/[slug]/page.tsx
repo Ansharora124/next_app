@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation";
-import connectDB from "@/lib/mongodb";
-import Event from "@/database/event.model";
 import { IEvent } from "@/database";
+import { connection } from "next/server";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
 import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
 import EventCard from "@/components/EventCard";
+import { Suspense } from "react";
 
 
 const EventDetailItem = ({ icon, alt, label }: { icon: string; alt: string; label: string }) => (
@@ -40,12 +40,29 @@ const EventTags=({tags}:{tags:string[]})=>(
   </div>
 
 )
-const EventDetailsPage = async ({ params }: {params:Promise<{slug:string}>}) => {
+const EventDetailsContent = async ({ params }: {params:Promise<{slug:string}>}) => {
+  await connection();
   
   const { slug } = await params;
 
   const request=await fetch(`${BASE_URL}/api/events/${slug}`);
-  const { event: { description, image, overview, location, date, time, mode ,agenda,organizer,tags} } = await request.json();
+// CHANGED: keep event object so BookEvent can use event._id and event.slug
+const { event } = await request.json();
+
+if (!event) return notFound();
+
+const {
+  description,
+  image,
+  overview,
+  location,
+  date,
+  time,
+  mode,
+  agenda,
+  organizer,
+  tags,
+} = event;
 
  
 
@@ -94,14 +111,14 @@ const EventDetailsPage = async ({ params }: {params:Promise<{slug:string}>}) => 
     <h2>Sign Up for the Event</h2>
      {bookings>0 ? (
 <p className="text-sm">
-  Join {bookings} peopple have already signed up for this event. Don't miss out!
+  Join {bookings} people have already signed up for this event. Don&apos;t miss out!
 </p>
     ):(
 <p className="text-sm">
   Be the first to sign up for this event and secure your spot!
 </p>
     )}
-<BookEvent/>
+<BookEvent eventId={event._id.toString()} slug={event.slug}/>
 
   </div>
  
@@ -129,5 +146,11 @@ const EventDetailsPage = async ({ params }: {params:Promise<{slug:string}>}) => 
     </section>
   )
 }
+
+const EventDetailsPage = ({ params }: {params:Promise<{slug:string}>}) => (
+  <Suspense fallback={<p>Loading event...</p>}>
+    <EventDetailsContent params={params} />
+  </Suspense>
+);
 
 export default EventDetailsPage

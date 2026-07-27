@@ -3,17 +3,16 @@ import EventCard from "@/components/EventCard";
 import { events as featuredEvents } from "@/lib/constants";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { IEvent } from "@/database";
-import { cacheLife } from "next/dist/server/use-cache/cache-life";
+import { connection } from "next/server";
+import { Suspense } from "react";
 
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-const page = async () => {
- 
-  'use cache';
-  cacheLife('hours');
+const HomeContent = async () => {
+  await connection();
 
-  const response=await fetch(`${BASE_URL}/api/events`);
+  const response=await fetch(`${BASE_URL}/api/events`, { cache: "no-store" });
   const {events}=await response.json();
 
  
@@ -48,5 +47,11 @@ const page = async () => {
     </section>
   );
 };
+
+const page = () => (
+  <Suspense fallback={<p>Loading events...</p>}>
+    <HomeContent />
+  </Suspense>
+);
 
 export default page;

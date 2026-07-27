@@ -6,40 +6,45 @@ import { v2 as cloudinary } from "cloudinary";
 export async function POST(req: NextRequest) {
     try{
         await connectDB();
-        const formData=await req.formData();
 
+        const contentType = req.headers.get("content-type") || "";
         let event;
 
-        try{
+        if (contentType.includes("application/json")) {
+            event = await req.json();
+        } else {
+            const formData=await req.formData();
             event=Object.fromEntries(formData.entries());
-        }catch(e){
-           
-            return NextResponse.json({ message: "Invalid form data jason"},{status:500});
+
+            const file=formData.get('image') as File | null;
+            if(file && file.size > 0) {
+                const arrayBuffer=await file.arrayBuffer();
+                const buffer=Buffer.from(arrayBuffer);
+
+                const uploadResult=await new Promise((resolve,reject)=>{
+                    cloudinary.uploader.upload_stream({resource_type:'image',folder:'DevEvent'},(error,result)=>{
+                        if(error) return reject(error);
+                        resolve(result);
+                    }).end(buffer);
+                });
+
+                event.image=(uploadResult as {secure_url: string}).secure_url;
+            }
         }
 
+        const tags = Array.isArray(event.tags)
+            ? event.tags
+            : JSON.parse(event.tags || "[]");
+        const agenda = Array.isArray(event.agenda)
+            ? event.agenda
+            : JSON.parse(event.agenda || "[]");
 
-const file=formData.get('image') as File;
-if(!file) return NextResponse.json({ message: "Image file is required"},{status:400});
- 
-let tags=JSON.parse(formData.get('tags') as string);
-let agenda=JSON.parse(formData.get('agenda') as string);
-
-const arrayBuffer=await file.arrayBuffer();
-const buffer=Buffer.from(arrayBuffer);
-
-const uploadResult=await new Promise((resolve,reject)=>{
-    cloudinary.uploader.upload_stream({resource_type:'image',folder:'DevEvent'},(error,result)=>{
-if(error) return reject(error);
-resolve(result);
-    }).end(buffer);
-});
-
-event.image=(uploadResult as {secure_url: string}).secure_url;
-const createdEvent=await Event.create({
-    ...event,
-    tags:tags,
-    agenda:agenda,
-});
+        const createdEvent=await Event.create({
+            ...event,
+            image: event.image || event.imageUrl,
+            tags,
+            agenda,
+        });
 
 return NextResponse.json({message:'Event created successfully',event:createdEvent },{status:201});
 
@@ -50,11 +55,11 @@ return NextResponse.json({message:'Event created successfully',event:createdEven
     }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try{
         await connectDB();
 
-        const events=await Event.find().sort({createdat:-1});
+        const events=await Event.find().sort({createdAt:-1});
         return NextResponse.json({message:'Events fetched successfully',events},{status:200});
 
     }catch(e){
