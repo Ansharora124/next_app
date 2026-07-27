@@ -3,6 +3,26 @@ import { NextRequest, NextResponse } from "next/server";
 import Event from "@/database/event.model";
 import { v2 as cloudinary } from "cloudinary";
 
+type EventQuery = {
+    mode?: string;
+    location?: RegExp;
+    tags?: RegExp | { $in: RegExp[] };
+    date?: {
+        $gte?: string;
+        $lte?: string;
+    };
+    $or?: Array<{
+        title?: RegExp;
+        location?: RegExp;
+        organizer?: RegExp;
+        tags?: RegExp;
+    }>;
+};
+
+function escapeRegex(value: string) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export async function POST(req: NextRequest) {
     try{
         await connectDB();
@@ -55,11 +75,67 @@ return NextResponse.json({message:'Event created successfully',event:createdEven
     }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try{
         await connectDB();
 
-        const events=await Event.find().sort({createdAt:-1});
+        const searchParams = req.nextUrl.searchParams;
+        const query: EventQuery = {};
+        const search = searchParams.get("q")?.trim();
+        const mode = searchParams.get("mode")?.trim();
+        const upcoming = searchParams.get("upcoming") === "true";
+        const location = searchParams.get("location")?.trim();
+        const tag = searchParams.get("tag")?.trim();
+        const startDate = searchParams.get("startDate")?.trim();
+        const endDate = searchParams.get("endDate")?.trim();
+
+        if (search) {
+            const searchRegex = new RegExp(escapeRegex(search), "i");
+            query.$or = [
+                { title: searchRegex },
+                { location: searchRegex },
+                { organizer: searchRegex },
+                { tags: searchRegex },
+            ];
+        }
+
+        if (mode && ["online", "offline", "hybrid"].includes(mode)) {
+            query.mode = mode;
+        }
+
+        if (location) {
+            query.location = new RegExp(escapeRegex(location), "i");
+        }
+
+        if (tag) {
+            const tagRegexes = tag
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean)
+                .map((item) => new RegExp(escapeRegex(item), "i"));
+
+            if (tagRegexes.length > 0) {
+                query.tags = { $in: tagRegexes };
+            }
+        }
+
+        if (upcoming || startDate || endDate) {
+            query.date = {};
+        }
+
+        if (upcoming) {
+            query.date!.$gte = new Date().toISOString().split("T")[0];
+        }
+
+        if (startDate) {
+            query.date!.$gte = startDate;
+        }
+
+        if (endDate) {
+            query.date!.$lte = endDate;
+        }
+
+        const events=await Event.find(query).sort({date:1,createdAt:-1});
         return NextResponse.json({message:'Events fetched successfully',events},{status:200});
 
     }catch(e){
