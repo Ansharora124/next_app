@@ -9,6 +9,7 @@ import { trackEvent } from "@/lib/posthog-client";
 const navigationItems = [
   { href: "/", label: "Home" },
   { href: "/#events", label: "Events" },
+  { href: "/bookings", label: "Bookings" },
   { href: "/events/create", label: "Create" },
 ];
 
@@ -18,7 +19,9 @@ const Navbar = () => {
   useEffect(() => {
     const pathname = window.location.pathname;
     const nextActiveIndex = pathname.startsWith("/events/create")
-      ? 2
+      ? 3
+      : pathname.startsWith("/bookings")
+        ? 2
       : pathname.startsWith("/events")
         ? 1
         : 0;
