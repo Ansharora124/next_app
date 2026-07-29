@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import AuthNav from "@/components/AuthNav";
 import GooeyNav from "@/components/GooeyNav";
 import { trackEvent } from "@/lib/posthog-client";
 
@@ -56,6 +57,7 @@ const Navbar = () => {
           particleR={90}
           onItemClick={(item) => handleNavigationClick(item.label, item.href)}
         />
+        <AuthNav />
       </nav>
     </header>
   );
