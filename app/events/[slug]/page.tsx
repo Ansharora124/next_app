@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
-import { IEvent } from "@/database";
 import { connection } from "next/server";
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
-import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
+import {
+  EventCardData,
+  getEventBySlug,
+  getSimilarEventsBySlug,
+} from "@/lib/actions/event.actions";
 import EventCard from "@/components/EventCard";
 import { Suspense } from "react";
 
@@ -44,10 +46,7 @@ const EventDetailsContent = async ({ params }: {params:Promise<{slug:string}>}) 
   await connection();
   
   const { slug } = await params;
-
-  const request=await fetch(`${BASE_URL}/api/events/${slug}`);
-// CHANGED: keep event object so BookEvent can use event._id and event.slug
-const { event } = await request.json();
+  const event = await getEventBySlug(slug);
 
 if (!event) return notFound();
 
@@ -69,7 +68,7 @@ const {
 
   if(!description) return notFound();
   const bookings=10;
-  const similarEvents :IEvent[] = await getSimilarEventsBySlug(slug);
+  const similarEvents = await getSimilarEventsBySlug(slug);
 
   return (
     <section id="event">
@@ -118,7 +117,7 @@ const {
   Be the first to sign up for this event and secure your spot!
 </p>
     )}
-<BookEvent eventId={event._id.toString()} slug={event.slug}/>
+<BookEvent eventId={event.id} slug={event.slug}/>
 
   </div>
  
@@ -132,8 +131,8 @@ const {
   <h2>Similar Events</h2>
   <div className="events">
     {similarEvents.length>0 ? (
-      similarEvents.map((similarEvent:IEvent)=>(
-        <EventCard key={similarEvent._id.toString()} {...similarEvent}/>
+      similarEvents.map((similarEvent:EventCardData)=>(
+        <EventCard key={similarEvent.id} {...similarEvent}/>
       ))
     ) : (
       <p>No similar events found.</p>

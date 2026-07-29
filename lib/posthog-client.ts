@@ -26,17 +26,21 @@ export async function trackEvent(
   event: string,
   properties?: Record<string, unknown>
 ) {
-  const distinctId = getBrowserDistinctId();
+  try {
+    const distinctId = getBrowserDistinctId();
 
-  await fetch("/api/posthog/track", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      distinctId,
-      event,
-      properties,
-    }),
-  });
+    await fetch("/api/posthog/track", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        distinctId,
+        event,
+        properties,
+      }),
+    });
+  } catch (error) {
+    console.error("Client event tracking failed:", error);
+  }
 }

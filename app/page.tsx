@@ -3,12 +3,9 @@ import EventCard from "@/components/EventCard";
 import { LiquidGlassCard } from "@/components/ui/liquid-glass";
 import { events as featuredEvents } from "@/lib/constants";
 import { captureServerEvent } from "@/lib/posthog-server";
-import { IEvent } from "@/database";
+import { EventCardData, getEvents } from "@/lib/actions/event.actions";
 import { connection } from "next/server";
 import { Suspense } from "react";
-
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 type EventFilters = {
   q?: string;
@@ -41,16 +38,7 @@ const HomeContent = async ({
     endDate: getFilterValue(params?.endDate),
   };
 
-  const eventParams = new URLSearchParams();
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value) {
-      eventParams.set(key, value);
-    }
-  });
-
-  const response=await fetch(`${BASE_URL}/api/events?${eventParams.toString()}`, { cache: "no-store" });
-  const {events}=await response.json();
+  const events = await getEvents(filters);
 
  
   await captureServerEvent({
@@ -163,8 +151,8 @@ const HomeContent = async ({
 
         {events && events.length > 0 ? (
           <ul className="events">
-            {events.map((event:IEvent) => (
-              <li key={event.title} className="list-none">
+            {events.map((event: EventCardData) => (
+              <li key={event.id} className="list-none">
                 <EventCard {...event} />
               </li>
             ))}
